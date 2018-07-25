@@ -1,6 +1,6 @@
 {
   "name": "api-module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A solution to use axios with configs separated to modules",
   "main": "dist/ApiModule.js",
   "module": "src/index.js",
@@ -15,9 +15,9 @@
   "private": false,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gmfe/react-gm.git"
+    "url": "https://github.com/alanchenchen/ApiModule"
   },
-  "homepage": "https://github.com/gmfe/react-gm#readme",
+  "homepage": "https://github.com/alanchenchen/ApiModule",
   "license": "MIT",
   "devDependencies": {
     "babel-core": "^6.26.0",
