@@ -1,0 +1,50 @@
+{
+  "name": "@alan/api-module",
+  "version": "0.0.1",
+  "description": "A solution to use axios with configs separated to modules",
+  "main": "dist/ApiModule.js",
+  "module": "src/index.js",
+  "scripts": {
+    "build": "webpack --progress"
+  },
+  "keywords": [
+    "axios",
+    "module"
+  ],
+  "author": "Alan Chen",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gmfe/react-gm.git"
+  },
+  "homepage": "https://github.com/gmfe/react-gm#readme",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-stage-3": "^6.24.1",
+    "uglifyjs-webpack-plugin": "^1.0.1",
+    "webpack": "^3.8.1"
+  },
+  "dependencies": {
+    "axios": "^0.18.0"
+  },
+  "babel": {
+    "presets": [
+      "env",
+      "stage-3"
+    ],
+    "plugins": [
+      [
+        "transform-runtime",
+        {
+          "polyfill": false,
+          "regenerator": true,
+          "moduleName": "babel-runtime"
+        }
+      ]
+    ]
+  }
+}
