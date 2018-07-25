@@ -1,9 +1,8 @@
 {
   "name": "api-module",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A solution to use axios with configs separated to modules",
   "main": "dist/ApiModule.js",
-  "module": "src/index.js",
   "scripts": {
     "build": "webpack --progress"
   },
