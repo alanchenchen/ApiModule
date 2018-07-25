@@ -19,7 +19,7 @@
 ApiModule是在第二种使用方法上进行优化，在`new ApiModule(configs)`的同时会调用`axios(confings)`生成一个全局配置后的axios方法。然后所有的具体接口会写在另外一个模块里，每个接口都可以配置自己的request headers和timeout等等。导入接口模块后，再调用实例的`createApi()`方法，就会返回一个函数，开发者只需要在需要请求接口的地方调用该函数即可。对具体接口所有的配置，与该函数无关，只在接口模块里进行修改即可。
 
 ## Usage Help
-1. `npm install @alan/api-module --save` or `yarn add @alan/api-module`。 或者直接script引入即可(ApiModule直接挂载在windows对象下)
+1. `npm install api-module --save` or `yarn add api-module`。 或者直接script引入即可(ApiModule直接挂载在windows对象下)
 2. 新建一个接口模块，导出一个对象。key是每个接口的别名(api函数的第一个参数)，value是一个对象，可选所有axios的配置项。例如：
 ``` javascript
     //接口模块 apiConfig.js
@@ -49,7 +49,7 @@ ApiModule是在第二种使用方法上进行优化，在`new ApiModule(configs)
 3. 建议新建一个模块作为api模块。然后`new ApiModule(globalConfig)`,globalConfig是全局配置，例如可以加入baseURL,method，content-type等。然后调用实例的`createApi(apiConfig)`方法，例如：
 ``` javascript
     //全局api函数模块 api.js
-    import ApiModule from '@alan/api-module' //导入ApiModule
+    import ApiModule from 'api-module' //导入ApiModule
     import apiConfig from 'apiConfig' //导入具体接口的模块
 
     const globalConfig = {
