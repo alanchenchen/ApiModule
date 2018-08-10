@@ -1,6 +1,6 @@
 {
   "name": "api-module",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A solution to use axios with configs separated to modules",
   "main": "dist/ApiModule.js",
   "scripts": {
