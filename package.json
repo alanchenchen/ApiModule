@@ -1,33 +1,49 @@
 {
   "name": "api-module",
-  "version": "0.0.4",
+  "version": "0.0.6",
+  "author": "Alan Chen",
   "description": "A solution to use axios with configs separated to modules",
   "main": "dist/ApiModule.js",
-  "scripts": {
-    "build": "webpack --progress"
-  },
   "keywords": [
     "axios",
     "module"
   ],
-  "author": "Alan Chen",
+  "license": "MIT",
   "private": false,
   "repository": {
     "type": "git",
     "url": "https://github.com/alanchenchen/ApiModule"
   },
   "homepage": "https://github.com/alanchenchen/ApiModule",
-  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alanchenchen/ApiModule/issues",
+    "email": "739709491@qq.com"
+  },
+  "scripts": {
+    "config": "node config/index.js",
+    "build": "webpack --progress"
+  },
+  "dependencies": {},
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-stage-3": "^6.24.1",
+    "chalk": "^2.4.1",
+    "clean-webpack-plugin": "^0.1.19",
+    "css-loader": "^0.28.7",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "file-loader": "^1.1.4",
+    "inquirer": "^6.1.0",
     "uglifyjs-webpack-plugin": "^1.0.1",
+    "vue-loader": "^13.0.5",
+    "vue-template-compiler": "^2.4.4",
     "webpack": "^3.8.1"
   },
-  "dependencies": {},
+  "engines": {
+    "node": ">= v8.11.1"
+  },
   "babel": {
     "presets": [
       "env",

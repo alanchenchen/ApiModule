@@ -1,7 +1,9 @@
 # ApiModule
 > 基于axios二次封装，为了解决RESTFUL接口冗余问题的一种前端工程化尝试
 
-> version:  0.0.3
+> version:  0.0.6
+
+> lastDate: 2018/11/29
 
 > Author:  Alan Chen
 
@@ -9,14 +11,16 @@
 1. 以axios作为基础库，完全基于axios的api使用方法。
 2. 模块化管理各个RESTFUL接口的配置。
 3. 预先提供全局配置，也可以在每个RESTFUL接口具体配置，出现重复配置时以具体接口配置优先处理。
+4. 统一请求参数的格式，支持请求后台动态路由。
+5. 每个接口除了data以外，支持axios的config所有配置。新增一个dynamicRouter配置项作为是否启用动态路由接口的标识。
 
 ## Why
 * 在开发前端页面过程中，势必会因为一堆RESTFUL接口的管理带来麻烦，举个例子，目前一个项目已经存在30个接口，如果需要更改a接口的timeout或者method，大家肯定会直接去具体的api调用函数里更改，但是假设api函数所在页面的代码量过于多，定位到准确位置怕是会耗费不少时间。
 * 目前axios使用大概分成两种：
     1. 直接使用`axios.get(url, configs)`或者`axios.post(url, data, configs)`这类方法，这样会存在很大的问题，给具体接口配置request headers和timeout会非常麻烦
-    2. 使用`axios(confings)`或者`axios.defaults`搭配`axios.create(configs)`来预设全局配置，这种比第一种要好很多，但是还是会遇到具体接口配置的问题
+    2. 使用`axios(url, confings)`或者`axios.defaults`搭配`axios.create(configs)`来预设全局配置，这种比第一种要好很多，但是还是会遇到具体接口配置的问题
 ### ApiModule是怎么做的
-ApiModule是在第二种使用方法上进行优化，在`new ApiModule(configs)`的同时会调用`axios(confings)`生成一个全局配置后的axios方法。然后所有的具体接口会写在另外一个模块里，每个接口都可以配置自己的request headers和timeout等等。导入接口模块后，再调用实例的`createApi()`方法，就会返回一个函数，开发者只需要在需要请求接口的地方调用该函数即可。对具体接口所有的配置，与该函数无关，只在接口模块里进行修改即可。
+ApiModule是在第二种使用方法上进行优化，在`new ApiModule(configs)`的同时会调用`axios(url, confings)`生成一个全局配置后的axios方法。然后所有的具体接口会写在另外一个模块里，每个接口都可以配置自己的request headers和timeout等等。导入接口模块后，再调用实例的`createApi()`方法，就会返回一个函数，只需要在需要请求接口的地方调用该函数即可。对具体接口所有的配置，与该函数无关，只在接口模块里进行修改即可。
 
 ## Usage Help
 1. `npm install api-module --save` or `yarn add api-module`。 或者直接script引入即可(ApiModule直接挂载在windows对象下)
@@ -27,12 +31,12 @@ ApiModule是在第二种使用方法上进行优化，在`new ApiModule(configs)
         //登入接口
         login: {
             url: 'sign/login', //url为具体的接口名称
-            timeout: 3000 //接口的超时处理时间
+            timeout: 5000 //将此接口的超时处理时间改为5s
         },
         //登出接口
         logout: {
             url: 'sign/logout',
-            timeout: 3000
+            dynamicRouter: true //插件自带的配置项，不是axios自带。开启后支持请求后台的动态路由。例如：sing/logout/alan。此时alan是作为参数被后台解析
         },
         //更改用户权限接口
         setRoleAccess: {
@@ -74,8 +78,17 @@ ApiModule是在第二种使用方法上进行优化，在`new ApiModule(configs)
             console.log(err)
         })
 
-    //get请求有参数，参数直接以对象传入,已对axios做过处理，不需要加入params的key
-    api('logout', {username: 'alan'})
+    //get请求有参数，且不是动态路由接口。参数直接以对象传入,已对axios做过处理，不需要加入params的key。无参数可以不填
+    api('login', {username: 'alan'})
+        .then(res => {
+            console.log(res)
+        })
+        .catch(err => {
+            console.log(err)
+        })
+        
+    //get请求有参数，且是动态路由接口。参数必须是string或number类型，不能忽略参数，否则会抛出异常
+    api('logout', 'alan')
         .then(res => {
             console.log(res)
         })
@@ -94,11 +107,27 @@ ApiModule是在第二种使用方法上进行优化，在`new ApiModule(configs)
 
 ```
 
+5. 插件同时也导出了`axios`。方便使用axios自带的拦截器功能。
+```javascript
+    import { axios } from 'api-module'
+
+    // 原生axios的拦截器
+    axios.interceptors.request.use(function (config) {
+        // 在发送请求之前做些什么
+        console.log('你被拦截啦！！')
+        return config
+    }, function (error) {
+        // 对请求错误做些什么
+        return Promise.reject(error)
+    })
+```
+
 ## Attentions
 
 1. 插件本身预设了几个配置项，如果不做任何设置，默认是get请求，Content-Type默认是application/x-www-form-urlencoded编码。
 2. 使用此插件可以最大程度解耦RESTFUL接口和具体业务，开发者只需要用接口地址别名请求，而需要更改接口配置时，不用知道在哪个页面调用了此接口，只需要将注意点放在apiConfig。
-3. 此插件可以在任何框架中使用，无需安装axios，已经集成在内，我本人在vue框架内使用，如果觉得在每个组件内引入api模块比繁琐，可以在`main.js`导入，然后挂载在`vue.prototype`上。但是不建议这么做。
+3. 此插件可以在任何框架中使用，无需安装axios，已经集成在内，我本人在vue框架内使用，如果觉得在每个组件内引入api模块比繁琐，可以在`main.js`导入，然后挂载在`vue.prototype`上。
+4. 至于插件接口的配置项，直接去看axios文档，与axios函数的第二个参数config完全一致。
 
 ## To do
 
