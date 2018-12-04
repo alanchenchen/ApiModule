@@ -1,9 +1,9 @@
 # ApiModule
 > 基于axios二次封装，为了解决RESTFUL接口冗余问题的一种前端工程化尝试
 
-> version:  0.0.6
+> version:  0.0.7
 
-> lastDate: 2018/11/29
+> lastDate: 2018/12/4
 
 > Author:  Alan Chen
 
@@ -11,7 +11,7 @@
 1. 以axios作为基础库，完全基于axios的api使用方法。
 2. 模块化管理各个RESTFUL接口的配置。
 3. 预先提供全局配置，也可以在每个RESTFUL接口具体配置，出现重复配置时以具体接口配置优先处理。
-4. 统一请求参数的格式，支持请求后台动态路由。
+4. 统一请求参数的格式，支持请求后台动态路由，支持多个路由参数动态传入。`任何请求方式都支持动态路由参数!`
 5. 每个接口除了data以外，支持axios的config所有配置。新增一个dynamicRouter配置项作为是否启用动态路由接口的标识。
 
 ## Why
@@ -20,90 +20,108 @@
     1. 直接使用`axios.get(url, configs)`或者`axios.post(url, data, configs)`这类方法，这样会存在很大的问题，给具体接口配置request headers和timeout会非常麻烦
     2. 使用`axios(url, confings)`或者`axios.defaults`搭配`axios.create(configs)`来预设全局配置，这种比第一种要好很多，但是还是会遇到具体接口配置的问题
 ### ApiModule是怎么做的
-ApiModule是在第二种使用方法上进行优化，在`new ApiModule(configs)`的同时会调用`axios(url, confings)`生成一个全局配置后的axios方法。然后所有的具体接口会写在另外一个模块里，每个接口都可以配置自己的request headers和timeout等等。导入接口模块后，再调用实例的`createApi()`方法，就会返回一个函数，只需要在需要请求接口的地方调用该函数即可。对具体接口所有的配置，与该函数无关，只在接口模块里进行修改即可。
+ApiModule是在第二种使用方法上进行优化，在`new ApiModule(configs)`的同时会调用`axios(url, configs)`生成一个全局配置后的axios方法。然后所有的具体接口会写在另外一个模块里，每个接口都可以配置自己的request headers和timeout等等。导入接口模块后，再调用实例的`createApi()`方法，就会返回一个函数，只需要在需要请求接口的地方调用该函数即可。对具体接口所有的配置，与该函数无关，只在接口模块里进行修改即可。
 
 ## Usage Help
 1. `npm install api-module --save` or `yarn add api-module`。 或者直接script引入即可(ApiModule直接挂载在windows对象下)
-2. 新建一个接口模块，导出一个对象。key是每个接口的别名(api函数的第一个参数)，value是一个对象，可选所有axios的配置项。例如：
+2. 新建一个接口模块，导出一个对象。key是每个接口的别名(api函数参数的url值)，value是一个对象，可选所有axios的配置项。例如：
 ``` javascript
-    //接口模块 apiConfig.js
-    export default {
+    //接口模块 config.js
+    const apiConfig = {
         //登入接口
         login: {
             url: 'sign/login', //url为具体的接口名称
+            method: 'GET', //默认为GET请求，可以不填
             timeout: 5000 //将此接口的超时处理时间改为5s
         },
         //登出接口
         logout: {
-            url: 'sign/logout',
+            url: 'sign/logout/name/:name/date/:date', //通过占位符来处理路由参数格式，具体参数将在api函数内通过dynamicRouterParams传入
+            method: 'PUT', //PUT请求，此时请求头编码格式默认为form表单
             dynamicRouter: true //插件自带的配置项，不是axios自带。开启后支持请求后台的动态路由。例如：sing/logout/alan。此时alan是作为参数被后台解析
         },
         //更改用户权限接口
         setRoleAccess: {
             url: 'role/queryAccess',
-            method: 'post', //请求方式改为post
+            method: 'POST', //POST请求
             headers: { 
-                'Content-Type': 'application/json', //请求头的编码格式
+                'Content-Type': 'application/json', //请求头编码格式改为json
                 'Author': 'Alan' //自定义接口的请求头
             }
         }
     }
 
+    const globalConfig = {
+        baseURL: 'www.example.com' //预设所有接口的接口前缀
+        timeout: 3000 //预设所有接口的超时处理时间是3s
+    } 
+    
+    export {
+        globalConfig,
+        apiConfig
+    }
 ```
 3. 建议新建一个模块作为api模块。然后`new ApiModule(globalConfig)`,globalConfig是全局配置，例如可以加入baseURL,method，content-type等。然后调用实例的`createApi(apiConfig)`方法，例如：
 ``` javascript
     //全局api函数模块 api.js
     import ApiModule from 'api-module' //导入ApiModule
-    import apiConfig from 'apiConfig' //导入具体接口的模块
-
-    const globalConfig = {
-        baseURL: 'www.example.com' //预设所有接口的接口前缀
-        timeout: 3000 //预设所有接口的超时处理时间是3s
-    }
+    import { apiConfig, globalConfig } from 'config' //导入具体接口的模块
 
     export default new ApiModule(globalConfig).createApi(apiConfig) //导出api函数
 
 ```
-4. 在其他需要调用接口的模块里直接使用`api(url, data)`即可
+4. 在其他需要调用接口的模块里直接使用`api({url, data, dynamicRouterParams})`即可
 ``` javascript
     //login 登陆模块 login.js
     import api from 'api'
 
     //get请求无参数
-    api('login')
-        .then(res => {
-            console.log(res)
-        })
-        .catch(err => {
-            console.log(err)
-        })
+    api({
+        url: 'login',
+    })
+    .then(res => {
+        console.log(res)
+    })
+    .catch(err => {
+        console.log(err)
+    })
 
-    //get请求有参数，且不是动态路由接口。参数直接以对象传入,已对axios做过处理，不需要加入params的key。无参数可以不填
-    api('login', {username: 'alan'})
-        .then(res => {
-            console.log(res)
-        })
-        .catch(err => {
-            console.log(err)
-        })
+    //get请求有参数
+    api({
+        url: 'login',
+        data: { username: 'alan' } //参数直接以对象传入,已对axios做过处理，不需要加入params的key。无参数可以不填
+    })
+    .then(res => {
+        console.log(res)
+    })
+    .catch(err => {
+        console.log(err)
+    })
+
+    //PUT请求，且是动态路由接口。最终的url路径为'sign/logout/name/alan/date/2018-12-4',请求体是{username: 'alan'},格式为form表单编码
+    api({
+        url: 'logout',
+        data: { username: 'alan' }, //参数直接以对象传入。无参数可以不填
+        dynamicRouterParams: { name: 'alan', date: '2018-12-4' } //路由参数必须是Object类型，不能忽略参数，否则会抛出异常
+    })
+    .then(res => {
+        console.log(res)
+    })
+    .catch(err => {
+        console.log(err)
+    })
         
-    //get请求有参数，且是动态路由接口。参数必须是string或number类型，不能忽略参数，否则会抛出异常
-    api('logout', 'alan')
-        .then(res => {
-            console.log(res)
-        })
-        .catch(err => {
-            console.log(err)
-        })
-
-    //post请求有参数，参数直接以对象传入
-    api('setRoleAccess', {username: 'alan', access: 'admin'})
-        .then(res => {
-            console.log(res)
-        })
-        .catch(err => {
-            console.log(err)
-        })
+    //POST请求有参数
+    api({
+        url: 'setRoleAccess',
+        data: { username: 'alan', access: 'admin' } //参数直接以对象传入。无参数可以不填
+    })
+    .then(res => {
+        console.log(res)
+    })
+    .catch(err => {
+        console.log(err)
+    })
 
 ```
 

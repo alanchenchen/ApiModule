@@ -5,7 +5,7 @@
 module.exports = {
     libraryName: 'api-module', // npm包名，首字母不允许大写，支持驼峰和短杆写法
     bundleName: 'ApiModule', // 打包后文件名，也是UMD script直接引入挂在windows对象的key名
-    version: '0.0.5', // 版本号
+    version: '0.0.7', // 版本号
     description: 'A solution to use axios with configs separated to modules', // 包描述
     keywords: ['axios', 'module'], // 关键词
     author: 'Alan Chen', // 作者
