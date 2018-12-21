@@ -1,4 +1,9 @@
 # ApiModule
+
+![](https://img.shields.io/npm/v/api-module.svg)
+![](https://img.shields.io/npm/dt/api-module.svg)
+![](https://img.shields.io/github/license/alanchenchen/ApiModule.svg)
+
 > 基于axios二次封装，为了解决RESTFUL接口冗余问题的一种前端工程化尝试
 
 > version:  0.0.7
