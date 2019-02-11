@@ -1,2 +1,3 @@
 config/
 yarn.lock
+.travis.yml

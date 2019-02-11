@@ -1,21 +1,20 @@
-/**
+/**!
  * @name ApiModule
  * @author Alan chen 
- * @since 2018/12/4
+ * @since 2019/2/11
  * @license MIT
  */
-import axios from 'axios'
 
-export {
-    axios
-}
+const axios = require('axios')
 
-export default class ApiModule {
+class ApiModule {
     constructor(globalConfig) {
+        this.moduleInfo = []
         this.init(globalConfig)
     }
+
     // 初始化全局配置
-    init(globalConfig) { 
+    init(globalConfig={}) { 
         /* 默认配置参数 */
         const baseConfig = {
             method: 'GET',
@@ -26,6 +25,7 @@ export default class ApiModule {
         /* 用户传入的全局配置参数和默认参数合并 */
         this.globalConfig = {...baseConfig, ...globalConfig}
     }
+
     // axios核心方法
     _base( url, data, dynamicRouterParams, config ) {
         const isDynamicRouter = Boolean(config.dynamicRouter)
@@ -87,10 +87,11 @@ export default class ApiModule {
             }]
         })
     }
+
     // 暴露出去的api方法
     createApi(apiConfig) {
-        if(Object.prototype.toString.call(apiConfig) != '[object Object]') {
-            throw new Error('ivalid param, the param must be Object')
+        if(this.moduleInfo.length == 0 && Object.prototype.toString.call(apiConfig) != '[object Object]') {
+            throw new Error('ivalid param, the param must be an object')
         }
         else {
             /**
@@ -99,8 +100,25 @@ export default class ApiModule {
              * @param {Object} data 请求的内容，可以是请求头中的queryString键值对，也可以是请求体的内容
              * @param {Object} dynamicRouterParams 动态路由参数，键值对。
              */
-            this.api = ({url: name, data, dynamicRouterParams}) => {
-                const { url, ...rest} = apiConfig[name]
+            this.api = ({url: name, data, dynamicRouterParams, module}) => {
+                /**
+                 * 调用api函数时有两种模块config引入写法，一种是url中带->。一种是module字段声明，如果两种写法同时存在，module字段优先级更高
+                 * createApi有两种调用方式：
+                 *  1. 不传入参数，默认采用模块注册，此时插件必须事先调用registerModule。并且调用api函数时必须指定模块名
+                 *  2. 传入参数，通过调用api函数时model字段来决定取局部config还是全局config
+                 */
+                const isUseModule = Boolean(module) || name.includes('->')
+                const moduleName = module || name.split('->')[0].trim()
+                const pathName = (name.includes('->') && name.split('->')[1].trim()) || name
+                const targetConfig = isUseModule
+                                ? this.moduleInfo.find(item => item.name == moduleName).module
+                                : apiConfig
+
+                if(!Boolean(targetConfig[pathName])) {
+                    throw new Error('could not find the request url, please check whether you register module or input the apiConfig')
+                }
+
+                const {url, ...rest} = targetConfig[pathName]
                 /* 具体接口的配置参数和全局配置合并 */
                 const config = { ...this.globalConfig, ...rest }
                 return this._base(url, data, dynamicRouterParams, config)
@@ -109,7 +127,29 @@ export default class ApiModule {
         }
     }
 
+    /**
+     * @function 注册模块，模块会自带命名空间，避免了命名冲突
+     * @param {Object} 对象含有一个2个key，必选。name是模块名，String。module是具体模块，Array。module的写法与apiConfig一致。 
+     */
+    registerModule({name, module}) {
+        if(Boolean(name) && typeof name == 'string') {
+            this.moduleInfo.push({
+                name,
+                module
+            })
+            return this
+        }
+        else {
+            throw new Error('if you use the module, the module name is necessary')
+        }
+    }
+
     // createApiCover() {
         
     // }
+}
+
+module.exports = {
+    ApiModule,
+    axios
 }
