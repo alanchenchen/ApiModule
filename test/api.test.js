@@ -1,8 +1,9 @@
 const assert = require('assert')
 const ApiModule = require('../src/index').ApiModule
 const {fork} = require('child_process')
+const {join} = require('path')
 
-const serverIns = fork('example/server.js')
+const serverIns = fork(join(process.cwd(), 'example/server.js'))
 
 const api = new ApiModule({
                 baseURL: 'http://localhost:7070'
