@@ -1,6 +1,6 @@
 {
   "name": "api-module",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "author": "Alan Chen",
   "description": "A solution to use axios with configs separated to modules",
   "main": "dist/ApiModule.js",
@@ -8,7 +8,7 @@
     "axios",
     "module"
   ],
-  "license": "MIT",
+  "license": "anti 996",
   "private": false,
   "repository": {
     "type": "git",

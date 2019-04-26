@@ -2,13 +2,13 @@
 
 ![](https://img.shields.io/npm/v/api-module.svg)
 ![](https://img.shields.io/npm/dt/api-module.svg)
-![](https://img.shields.io/github/license/alanchenchen/ApiModule.svg)
+[![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
 
 > 基于axios二次封装，为了解决RESTFUL接口冗余问题的一种前端工程化尝试
 
-> version:  0.0.8
+> version:  0.0.9
 
-> lastDate: 2019/2/11
+> lastDate: 2019/4/26
 
 > Author:  Alan Chen
 
@@ -51,9 +51,10 @@ ApiModule是在第二种使用方法上进行优化，在`new ApiModule(configs)
             timeout: 5000
         }
     ```
-3. ApiModule实例有两个方法：
+3. ApiModule实例有3个方法：
     * registerModule({name, module})，注册模块作用域config。name为string，module格式与config一致，均必选。如果调用了该方法，则表示module内的config存入自己模块的作用域内，这样就避免了命名冲突。registerModule支持链式调用。
-    * createApi(config)，注册全局作用域cofnig并生成api函数。config格式与globalConfig一致，可选，如果传入了config，则当前config会存入插件的全局作用域。必须调用该方法，否则不会生成api函数。
+    * createApi(config)，注册全局作用域cofnig并生成api函数。config格式与globalConfig一致，可选，如果传入了config，则当前config会存入插件的全局作用域。必须调用该方法，否则不会生成api函数。createApi不支持链式调用。
+    * setHeader(headers)，更新全局配置的请求头，更新后，所有的请求都会合并新的全局请求头信息。参数最多有两个，当只有一个参数时，必须为Object，当有两个参数时，参数一是key，参数二是value。
 4. 通过ApiModule实例的createApi方法会返回一个函数，只需要在其他业务模块内调用该函数即可，函数使用与原生axios相似。该函数参数为一个对象，可选key如下：
     * url `[String]`，必选，config中的key名，不是config中的url
     * data `[Object]`，可选，axios的data参数，作为请求头或请求体
@@ -152,3 +153,6 @@ ApiModule是在第二种使用方法上进行优化，在`new ApiModule(configs)
 ## To do
 
 这个插件只是我从现有项目里抽离出来的一小部分，因为觉得一个项目一旦超过几十个接口就很难维护，所以抽出一个比较小的插件。我在vue里使用的接口配置就是插件的思路，但是加入了返回状态码的管理。因为在我的项目里，和后台约定过的code与返回的数据data可以分开操作。举个例子，所有接口都会返回code 0000或者0001，0000表示请求成功，0001表示请求失败(这里的code不是指http状态码)，在我需要操作返回数据前需要对用户操作做一个提示，那么我仅仅只需要操作code即可，所以我在项目里把对code的操作抽出来，然后写了个插件加载器。然后把对不同code的操作分别模块化处理，有对code做的提示框，有当code为0009时登陆超时直接跳回登陆页的模块....我原本准备在这个插件里集成这个功能，后来发现，每个项目和后台约定的返回数据格式千奇百怪，并且axios本身也继承了拦截器，所以以后会不会做看情况吧...
+
+## license
+* Anti 996(996.ICU)
