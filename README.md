@@ -6,9 +6,9 @@
 
 > 基于axios二次封装，为了解决RESTFUL接口冗余问题的一种前端工程化尝试
 
-> version:  0.0.9
+> version:  0.1.1
 
-> lastDate: 2019/4/26
+> lastDate: 2019/7/3
 
 > Author:  Alan Chen
 
@@ -43,18 +43,21 @@ ApiModule是在第二种使用方法上进行优化，在`new ApiModule(configs)
 
 ## Usage Help
 1. npm包导出一个对象，ApiModule是插件核心类。axios为axios本身，可以用来做拦截
-2. ApiModule构造函数可选一个对象globalConfig，作为接口的全局配置传入。格式如下：
+2. ApiModule构造函数可选两个参数，参数一是对象globalConfig，作为接口的全局配置传入。参数二是对象preConfigs，目前支持一个dynamicRouterPattern的key，用作动态路由的占位符规则。。格式如下：
     ```js
         // 与axios的原有config完全一致
         {
             baseURL: 'http://127.0.0.1:7070',
             timeout: 5000
+        },
+        {
+            dynamicRouterPattern: ':pattern' // 插件的动态路由url参数默认以：开头
         }
     ```
 3. ApiModule实例有3个方法：
-    * registerModule({name, module})，注册模块作用域config。name为string，module格式与config一致，均必选。如果调用了该方法，则表示module内的config存入自己模块的作用域内，这样就避免了命名冲突。registerModule支持链式调用。
+    * registerModule({name, module})，注册模块作用域config。name为string，module格式与config一致，均必选。如果调用了该方法，则表示module内的config存入自己模块的作用域内，这样就避免了命名冲突。函数返回ApiModule实例，registerModule支持链式调用。
     * createApi(config)，注册全局作用域cofnig并生成api函数。config格式与globalConfig一致，可选，如果传入了config，则当前config会存入插件的全局作用域。必须调用该方法，否则不会生成api函数。createApi不支持链式调用。
-    * setHeader(headers)，更新全局配置的请求头，更新后，所有的请求都会合并新的全局请求头信息。参数最多有两个，当只有一个参数时，必须为Object，当有两个参数时，参数一是key，参数二是value。
+    * setHeader(headers)，更新全局配置的请求头，更新后，所有的请求都会合并新的全局请求头信息。参数最多有两个，当只有一个参数时，必须为Object，当有两个参数时，参数一是key，参数二是value。函数返回ApiModule实例，setHeader支持链式调用。
 4. 通过ApiModule实例的createApi方法会返回一个函数，只需要在其他业务模块内调用该函数即可，函数使用与原生axios相似。该函数参数为一个对象，可选key如下：
     * url `[String]`，必选，config中的key名，不是config中的url
     * data `[Object]`，可选，axios的data参数，作为请求头或请求体
@@ -149,6 +152,7 @@ ApiModule是在第二种使用方法上进行优化，在`new ApiModule(configs)
 2. 使用此插件可以最大程度解耦RESTFUL接口和具体业务，开发者只需要用接口地址别名请求，而需要更改接口配置时，不用知道在哪个页面调用了此接口，只需要将注意点放在apiConfig。
 3. 此插件可以在任何框架中使用，无需安装axios，已经集成在内，我本人在vue框架内使用，如果觉得在每个组件内引入api模块比繁琐，可以在`main.js`导入，然后挂载在`vue.prototype`上。
 4. 至于插件接口的配置项，直接去看axios文档，与axios函数的第二个参数config完全一致。
+5. 构造器函数的第二参数dynamicRouterPattern支持自定义占位符重写，但是必须是字符串，而且必须要包含pattern。比如： {pattern}、@pattern。注意字符串内不允许出现正则表达式的特定符号，比如$、^等。
 
 ## To do
 

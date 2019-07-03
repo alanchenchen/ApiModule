@@ -1,17 +1,25 @@
 /**!
+ * 
  * @name ApiModule
  * @author Alan chen 
  * @since 2019/2/11
- * @license MIT
+ * @license Anti996
  */
 
 const axios = require('axios')
+const {
+    DEFAULT_DYNAMICROUTER_RPATTERN,
+    DYNAMICROUTER_PATTERN_FLAG,
+    MODULE_PATTERN,
+    DEFAULT_BASECONFIG
+} = require('./constant')
 
 class ApiModule {
-    constructor(globalConfig) {
+    constructor(globalConfig, configs = { dynamicRouterPattern: DEFAULT_DYNAMICROUTER_RPATTERN }) {
         this.version = require('../package.json').version
         this.createdBy = 'alanchenchen@github.com'
         this.moduleInfo = []
+        this._preConfigs = configs
         this._init(globalConfig)
     }
 
@@ -22,15 +30,8 @@ class ApiModule {
      * @param {Object} globalConfig 
      */
     _init(globalConfig = {}) {
-        /* 默认配置参数 */
-        const baseConfig = {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        }
         /* 用户传入的全局配置参数和默认参数合并 */
-        this.globalConfig = { ...baseConfig, ...globalConfig }
+        this.globalConfig = { ...DEFAULT_BASECONFIG, ...globalConfig }
     }
 
     /**
@@ -52,7 +53,8 @@ class ApiModule {
             if (Object.prototype.toString.call(dynamicRouterParams) == '[object Object]') {
                 /* 将动态路由参数中的占位符替换成请求中的路由参数 */
                 Object.entries(dynamicRouterParams).forEach(item => {
-                    const rule = new RegExp(`(\:${item[0]})`, 'g')
+                    const regArg = this._preConfigs.dynamicRouterPattern.replace(new RegExp(`${DYNAMICROUTER_PATTERN_FLAG}`, 'g'), item[0])
+                    const rule = new RegExp(`(${regArg})`, 'g')
                     _url = _url.replace(rule, item[1])
                 })
             }
@@ -62,16 +64,17 @@ class ApiModule {
         }
 
         if (Boolean(data)) {
-            if (Object.prototype.toString.call(data) != '[object Object]') {
-                throw new Error('ivalid data,data must be object')
-            }
-            else {
-                const NeedRequestBodyMethods = ['PUT', 'POST', 'PATCH']
-                /* 再区分是传params(请求方式通过头部url的queryString),还是传data(请求方式通过请求体的data) */
-                _data = NeedRequestBodyMethods.includes(method)
-                    ? { data }
-                    : { params: data }
-            }
+            /**
+             * 如果data作为请求体信息传输，data可以是以下任意类型：
+             * - string, plain object, ArrayBuffer, ArrayBufferView, URLSearchParams
+             * - 浏览器专属：FormData, File, Blob
+             * - Node 专属： Stream
+             **/
+            const NeedRequestBodyMethods = ['PUT', 'POST', 'PATCH']
+            /* 再区分是传params(请求方式通过头部url的queryString),还是传data(请求方式通过请求体的data) */
+            _data = NeedRequestBodyMethods.includes(method)
+                ? { data }
+                : { params: data }
         }
 
         return axios({
@@ -127,9 +130,9 @@ class ApiModule {
                  *  1. 不传入参数，默认采用模块注册，此时插件必须事先调用registerModule。并且调用api函数时必须指定模块名
                  *  2. 传入参数，通过调用api函数时model字段来决定取局部config还是全局config
                  */
-                const isUseModule = Boolean(module) || name.includes('->')
-                const moduleName = module || name.split('->')[0].trim()
-                const pathName = (name.includes('->') && name.split('->')[1].trim()) || name
+                const isUseModule = Boolean(module) || name.includes(MODULE_PATTERN)
+                const moduleName = module || name.split(MODULE_PATTERN)[0].trim()
+                const pathName = (name.includes(MODULE_PATTERN) && name.split(MODULE_PATTERN)[1].trim()) || name
                 const targetConfig = isUseModule
                     ? this.moduleInfo.find(item => item.name == moduleName).module
                     : apiConfig
@@ -154,6 +157,7 @@ class ApiModule {
      * @param {Object} opts
      * @param {String} opts.name 必选，模块名
      * @param {Array} opts.module 必选，模module的写法与apiConfig一致
+     * @returns ApiModuleInstance
      */
     registerModule({ name, module }) {
         if (Boolean(name) && typeof name == 'string') {
@@ -172,6 +176,7 @@ class ApiModule {
      * 更新全局headers
      * 
      * @param  {...any} rest 
+     * @returns ApiModuleInstance
      */
     setHeader(...rest) {
         if (rest.length == 1 && typeof rest == 'object') {

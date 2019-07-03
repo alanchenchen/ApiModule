@@ -7,6 +7,9 @@ const serverIns = fork(join(process.cwd(), 'example/server.js'))
 
 const api = new ApiModule({
                 baseURL: 'http://localhost:7070'
+            }, {
+                // 自定义动态路由的占位符为@开头
+                dynamicRouterPattern: '@pattern'
             })
             .registerModule({name: 'Hello', module: require('../example/api/moduleA')})
             .registerModule({name: 'Hi', module: require('../example/api/moduleB')})
@@ -18,6 +21,11 @@ const api = new ApiModule({
                         'Author': 'Alan Chen',
                         'From': 'Global'
                     }
+                },
+                person: {
+                    method: 'POST',
+                    url: 'person/@name/@age',
+                    dynamicRouter: true
                 }
             })
 
@@ -32,11 +40,32 @@ describe('ApiModule', function() {
                 url: 'say',
             })
             .then(({data}) => {
-                assert.equal(data, 'Yo  Alan Chen， 来自Global模块')
+                assert.strictEqual(data, 'Yo  Alan Chen， 来自Global模块')
                 done()
             })
             .catch(err => {
-                done(err.config)
+                if(err) {
+                    done(err)
+                }
+            })
+        })
+
+        it('dynamicRouter use, it would request the url with formated params', function(done) {
+            api({
+                url: 'person',
+                dynamicRouterParams: {
+                    name: 'alan',
+                    age: 25
+                }
+            })
+            .then(({data}) => {
+                assert.strictEqual(data, 'your name is alan, and you are 25 years old')
+                done()
+            })
+            .catch(err => {
+                if(err) {
+                    done(err)
+                }
             })
         })
     })
@@ -48,11 +77,13 @@ describe('ApiModule', function() {
                 module: 'Hello'
             })
             .then(({data}) => {
-                assert.equal(data, 'Hello  Alan Chen， 来自Module Hello模块')
+                assert.strictEqual(data, 'Hello  Alan Chen， 来自Module Hello模块')
                 done()
             })
             .catch(err => {
-                done(err.config)
+                if(err) {
+                    done(err)
+                }
             })
         })
     
@@ -61,11 +92,13 @@ describe('ApiModule', function() {
                 url: 'Hi -> say',
             })
             .then(({data}) => {
-                assert.equal(data, 'Hi  Alan Chen， 来自Module Hi模块')
+                assert.strictEqual(data, 'Hi  Alan Chen， 来自Module Hi模块')
                 done()
             })
             .catch(err => {
-                done(err.config)
+                if(err) {
+                    done(err)
+                }
             })
         })
     })

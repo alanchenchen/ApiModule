@@ -1,6 +1,6 @@
 {
   "name": "api-module",
-  "version": "0.0.9",
+  "version": "0.1.1",
   "author": "Alan Chen",
   "description": "A solution to use axios with configs separated to modules",
   "main": "dist/ApiModule.js",
@@ -8,7 +8,6 @@
     "axios",
     "module"
   ],
-  "license": "anti 996",
   "private": false,
   "repository": {
     "type": "git",
@@ -25,7 +24,7 @@
     "test": "mocha test/*.test.js"
   },
   "dependencies": {
-    "axios": "^0.18.0"
+    "axios": "^0.19.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
@@ -47,7 +46,7 @@
     "webpack": "^3.8.1"
   },
   "engines": {
-    "node": ">= v8.11.1"
+    "node": ">= v10.15.3"
   },
   "babel": {
     "presets": [

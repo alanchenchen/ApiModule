@@ -25,6 +25,12 @@ app.get('/name/:name/age/:age', (req, res) => {
     res.send(`your name is ${name}, and you're ${age} years old, the test header is ${testHeader}`)
 })
 
+app.post('/person/:name/:age', (req, res) => {
+    const name = req.params.name
+    const age = req.params.age
+    res.send(`your name is ${name}, and you are ${age} years old`)
+})
+
 app.listen(7070, () => {
     // console.log('server is running...')
 })
