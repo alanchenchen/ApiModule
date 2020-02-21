@@ -6,9 +6,9 @@
 
 > 基于axios二次封装，为了解决RESTFUL接口冗余问题的一种前端工程化尝试
 
-> version:  0.1.1
+> version:  0.2.0
 
-> lastDate: 2019/7/3
+> lastDate: 2020/2/21
 
 > Author:  Alan Chen
 
@@ -42,7 +42,7 @@ ApiModule是在第二种使用方法上进行优化，在`new ApiModule(configs)
 ```
 
 ## Usage Help
-1. npm包导出一个对象，ApiModule是插件核心类。axios为axios本身，可以用来做拦截
+1. npm包默认导出ApiModule核心类。命名导出axios为axios本身，可以用来做拦截
 2. ApiModule构造函数可选两个参数，参数一是对象globalConfig，作为接口的全局配置传入。参数二是对象preConfigs，目前支持一个dynamicRouterPattern的key，用作动态路由的占位符规则。。格式如下：
     ```js
         // 与axios的原有config完全一致
@@ -54,27 +54,29 @@ ApiModule是在第二种使用方法上进行优化，在`new ApiModule(configs)
             dynamicRouterPattern: ':pattern' // 插件的动态路由url参数默认以：开头
         }
     ```
-3. ApiModule实例有3个方法：
-    * registerModule({name, module})，注册模块作用域config。name为string，module格式与config一致，均必选。如果调用了该方法，则表示module内的config存入自己模块的作用域内，这样就避免了命名冲突。函数返回ApiModule实例，registerModule支持链式调用。
-    * createApi(config)，注册全局作用域cofnig并生成api函数。config格式与globalConfig一致，可选，如果传入了config，则当前config会存入插件的全局作用域。必须调用该方法，否则不会生成api函数。createApi不支持链式调用。
+3. ApiModule实例有4个方法：
+    * registerModule({name, module})，注册模块作用域config。name为string，module格式与config一致，均必选。如果调用了该方法，则表示module内的config存入自己模块的作用域内，这样就避免了命名冲突。函数返回ApiModule实例。支持链式调用。
+    * registerGlobal(config)，注册全局作用域cofnig。config格式与globalConfig一致，可选，如果传入了config，则当前config会存入插件的全局作用域。支持链式调用。
     * setHeader(headers)，更新全局配置的请求头，更新后，所有的请求都会合并新的全局请求头信息。参数最多有两个，当只有一个参数时，必须为Object，当有两个参数时，参数一是key，参数二是value。函数返回ApiModule实例，setHeader支持链式调用。
-4. 通过ApiModule实例的createApi方法会返回一个函数，只需要在其他业务模块内调用该函数即可，函数使用与原生axios相似。该函数参数为一个对象，可选key如下：
-    * url `[String]`，必选，config中的key名，不是config中的url
-    * data `[Object]`，可选，axios的data参数，作为请求头或请求体
-    * dynamicRouterParams `[Object]`，可选，当config中dynamicRouter为true时必选。动态路由的参数，插件为了更好的使用动态路由，提供了路由参数选项。格式见下文
+    * request(config)，发出请求，返回axios的结果。config是个对象，格式如下：
+        * url `[String]`，必选，config中的key名，不是config中的url
+        * data `[Object]`，可选，axios的data参数，作为请求头query或请求体
+        * dynamicRouterParams `[Object]`，可选，当config中dynamicRouter为true时必选。动态路由的参数，插件为了更好的使用动态路由，提供了路由参数选项。格式见下文
+        * module `[String]`，可选，指定使用哪个模块的config
 5. 使用如下：
     * api.js
     ``` javascript
-        import {ApiModule} from 'api-module' //导入ApiModule
+        import ApiModule from 'api-module' //导入ApiModule
         import { apiConfig, globalConfig } from 'config' //导入全局作用域接口
         import moduleA from 'moduleA' //导入模块作用域接口
         import moduleB from 'moduleB' //导入模块作用域接口
 
+        const api = new ApiModule(globalConfig);
+        api.registerModule({name: 'A', module: moduleA})
+           .registerModule({name: 'B', module: moduleB})
+           .registerGlobal(apiConfig);
         //导出api函数
-        export default new ApiModule(globalConfig)
-                        .registerModule({name: 'A', module: moduleA})
-                        .registerModule({name: 'B', module: moduleB})
-                        .createApi(apiConfig) 
+        export default api.request;
     ```
     * 业务模块，例如 login.js。直接使用api({url, data, dynamicRouterParams}即可)
     ``` javascript
@@ -153,10 +155,6 @@ ApiModule是在第二种使用方法上进行优化，在`new ApiModule(configs)
 3. 此插件可以在任何框架中使用，无需安装axios，已经集成在内，我本人在vue框架内使用，如果觉得在每个组件内引入api模块比繁琐，可以在`main.js`导入，然后挂载在`vue.prototype`上。
 4. 至于插件接口的配置项，直接去看axios文档，与axios函数的第二个参数config完全一致。
 5. 构造器函数的第二参数dynamicRouterPattern支持自定义占位符重写，但是必须是字符串，而且必须要包含pattern。比如： {pattern}、@pattern。注意字符串内不允许出现正则表达式的特定符号，比如$、^等。
-
-## To do
-
-这个插件只是我从现有项目里抽离出来的一小部分，因为觉得一个项目一旦超过几十个接口就很难维护，所以抽出一个比较小的插件。我在vue里使用的接口配置就是插件的思路，但是加入了返回状态码的管理。因为在我的项目里，和后台约定过的code与返回的数据data可以分开操作。举个例子，所有接口都会返回code 0000或者0001，0000表示请求成功，0001表示请求失败(这里的code不是指http状态码)，在我需要操作返回数据前需要对用户操作做一个提示，那么我仅仅只需要操作code即可，所以我在项目里把对code的操作抽出来，然后写了个插件加载器。然后把对不同code的操作分别模块化处理，有对code做的提示框，有当code为0009时登陆超时直接跳回登陆页的模块....我原本准备在这个插件里集成这个功能，后来发现，每个项目和后台约定的返回数据格式千奇百怪，并且axios本身也继承了拦截器，所以以后会不会做看情况吧...
 
 ## license
 * Anti 996(996.ICU)

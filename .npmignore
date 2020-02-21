@@ -1,3 +1,6 @@
 config/
+cli/
+src/
+docs/
+example/
 yarn.lock
-.travis.yml
