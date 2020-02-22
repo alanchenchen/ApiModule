@@ -5,7 +5,7 @@
  * @param {String} d 将缓存文件覆盖源package.json
  * @param {String} h 查看命令参数帮助
  */
-const fs = require("fs");
+import fs from "fs";
 import path from "path";
 import chalk from "chalk";
 import yaml from "js-yaml";
@@ -34,4 +34,4 @@ program
     .command("d", deployDesc, async() => await deploy(sourcePath, copyPath))
     .command("h", deployDesc, () => doc.render())
     .version(config.version)
-    .run()
+    .run();

@@ -33,6 +33,6 @@ app.post("/person/:name/:age", (req, res) => {
     res.send(`your name is ${name}, and you are ${age} years old`);
 });
 
-app.listen(7070, () => {
+app.listen(7070, "127.0.0.1", () => {
     // console.log("server is running...");
 });

@@ -1,18 +1,17 @@
 /**!
- * 
  * @name ApiModule
  * @author Alan chen 
  * @since 2020/2/21
  * @license Anti996
  */
-
-import fetch, { AxiosPromise } from "axios";
 import {
     PreConfig,
     RequestModuleConfig,
     ApiConfig,
     RequestConfig,
-    ModuleApiConfig
+    ModuleApiConfig,
+    RequestHandler,
+    ResponsePromise
 } from "./type";
 import {
     DEFAULT_DYNAMICROUTER_RPATTERN,
@@ -24,15 +23,18 @@ import {
 class ApiModule {
     private version: string = require("../package.json").version;
     private createdBy: string = "alanchenchen@github.com";
+    private fetch: any;
     private moduleApiInfo: ModuleApiConfig[] = [];
     private globalApiInfo: ApiConfig = {};
     private _preConfigs: PreConfig;
     private globalConfig: RequestModuleConfig = {};
 
     constructor(
-        globalConfig: RequestModuleConfig,
+        fetch: RequestHandler,
+        globalConfig?: RequestModuleConfig,
         configs: PreConfig = { dynamicRouterPattern: DEFAULT_DYNAMICROUTER_RPATTERN }
     ) {
+        this.fetch = fetch;
         this._preConfigs = configs;
         this._init(globalConfig);
     }
@@ -94,7 +96,7 @@ class ApiModule {
                 : { params: data };
         }
 
-        return fetch({
+        return this.fetch({
             url: _url,
             ..._data,
             ...config,
@@ -138,7 +140,7 @@ class ApiModule {
         data,
         dynamicRouterParams,
         module
-    }: RequestConfig): AxiosPromise<any> => {
+    }: RequestConfig): ResponsePromise => {
         /**
          * 调用api函数时有两种模块config引入写法，一种是url中带->。一种是module字段声明，如果两种写法同时存在，module字段优先级更高
          */
@@ -211,5 +213,10 @@ class ApiModule {
     }
 }
 
-export const axios = fetch;
+export const CONSTANT = {
+    DEFAULT_DYNAMICROUTER_RPATTERN,
+    DYNAMICROUTER_PATTERN_FLAG,
+    MODULE_PATTERN,
+    DEFAULT_BASECONFIG
+};
 export default ApiModule;

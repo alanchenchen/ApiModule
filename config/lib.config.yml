@@ -6,7 +6,7 @@ libraryName: api-module
 # 打包后文件名，也是UMD script直接引入挂在windows对象的key名
 bundleName: ApiModule 
 # 版本号
-version: 0.2.0
+version: 0.2.7
 # node版本
 nodeVersion: 8.16.0
 # license

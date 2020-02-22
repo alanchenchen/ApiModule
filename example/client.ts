@@ -1,5 +1,6 @@
-import ApiModule from "../src/index";
-import { ApiConfig } from "../src/type";
+import axios from "axios";
+import ApiModule from "api-module";
+import { ApiConfig } from "api-module/dist/type";
 import moduleA from "./api/moduleA";
 import moduleB from "./api/moduleB";
 
@@ -23,8 +24,8 @@ const globalApiConfig: ApiConfig = {
     }
 };
 
-const api = new ApiModule({
-    baseURL: "http://localhost:7070"
+const api = new ApiModule(axios, {
+    baseURL: "http://127.0.0.1:7070"
 })
     .registerModule({ name: "Hello", module: moduleA as any })
     .registerModule({ name: "Hi", module: moduleB as any })
@@ -42,7 +43,7 @@ const clientReq = async () => {
     const moduleB = await api.request({ url: "say", module: "Hi" });
     console.log(moduleB.data);
     // 动态路由传参请求，且更新全局headers
-    api.setHeader("test", "哈皮");
+    api.setHeader("test", "happy");
     const routerPath = await api.request({
         url: "name",
         dynamicRouterParams: {

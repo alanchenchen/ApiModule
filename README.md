@@ -6,9 +6,9 @@
 
 > 基于axios二次封装，为了解决RESTFUL接口冗余问题的一种前端工程化尝试
 
-> version:  0.2.0
+> version:  0.2.7
 
-> lastDate: 2020/2/21
+> lastDate: 2020/2/22
 
 > Author:  Alan Chen
 
@@ -30,29 +30,31 @@ ApiModule是在第二种使用方法上进行优化，在`new ApiModule(configs)
 ## Installatiom
 1. npm安装 
 ```js
-    npm install api-module --save
+    npm install api-module axios --save
 ```
-或
+2. yarn安装 
 ```js 
-    yarn add api-module
-```
-2. script 引入。ApiModule直接挂载在windows对象下
-```html
-    <script src="node_modules/api-module/dist/ApiModule.js"></script>
+    yarn add api-module axios
 ```
 
 ## Usage Help
-1. npm包默认导出ApiModule核心类。命名导出axios为axios本身，可以用来做拦截
-2. ApiModule构造函数可选两个参数，参数一是对象globalConfig，作为接口的全局配置传入。参数二是对象preConfigs，目前支持一个dynamicRouterPattern的key，用作动态路由的占位符规则。。格式如下：
+1. npm包默认导出ApiModule核心类。命名导出CONSTANT，是插件内部的所有常量，可以用来配置。
+2. ApiModule构造函数必选一个参数，可选两个参数，参数一是axios方法，参数二是对象globalConfig，作为接口的全局配置传入。参数三是对象preConfigs，目前支持一个dynamicRouterPattern的key，用作动态路由的占位符规则。。格式如下：
     ```js
+    import axios from "axios";
+    import ApiModule, { CONSTANT } from "api-module";
+
+    new ApiModule(
+        axios,
         // 与axios的原有config完全一致
         {
             baseURL: 'http://127.0.0.1:7070',
             timeout: 5000
         },
         {
-            dynamicRouterPattern: ':pattern' // 插件的动态路由url参数默认以：开头
+            dynamicRouterPattern: `:${CONSTANT.DYNAMICROUTER_PATTERN_FLAG}` // 插件的动态路由url参数默认以：开头
         }
+    );
     ```
 3. ApiModule实例有4个方法：
     * registerModule({name, module})，注册模块作用域config。name为string，module格式与config一致，均必选。如果调用了该方法，则表示module内的config存入自己模块的作用域内，这样就避免了命名冲突。函数返回ApiModule实例。支持链式调用。
@@ -66,12 +68,17 @@ ApiModule是在第二种使用方法上进行优化，在`new ApiModule(configs)
 5. 使用如下：
     * api.js
     ``` javascript
-        import ApiModule from 'api-module' //导入ApiModule
-        import { apiConfig, globalConfig } from 'config' //导入全局作用域接口
-        import moduleA from 'moduleA' //导入模块作用域接口
-        import moduleB from 'moduleB' //导入模块作用域接口
+        // 必选要导入axios
+        import axios from "axios";
+        import ApiModule from "api-module";
+         //导入全局作用域接口
+        import { apiConfig, globalConfig } from "config";
+         //导入模块作用域接口
+        import moduleA from "moduleA";
+         //导入模块作用域接口
+        import moduleB from "moduleB";
 
-        const api = new ApiModule(globalConfig);
+        const api = new ApiModule(axios, globalConfig);
         api.registerModule({name: 'A', module: moduleA})
            .registerModule({name: 'B', module: moduleB})
            .registerGlobal(apiConfig);
@@ -129,9 +136,9 @@ ApiModule是在第二种使用方法上进行优化，在`new ApiModule(configs)
         })
     ```
 
-6. 插件同时也导出了`axios`。方便使用axios自带的拦截器功能。
+6. 插件使用axios自带的拦截器功能。
 ```javascript
-    import { axios } from 'api-module'
+    import axios from "axios";
 
     // 原生axios的拦截器
     axios.interceptors.request.use(function (config) {
@@ -145,16 +152,16 @@ ApiModule是在第二种使用方法上进行优化，在`new ApiModule(configs)
 ```
 
 ## Example
-[example](./example/client.js)
+[example](./example/client.ts)
 
 
 ## Attentions
 
 1. 插件本身预设了几个配置项，如果不做任何设置，默认是get请求，Content-Type默认是application/x-www-form-urlencoded编码。
 2. 使用此插件可以最大程度解耦RESTFUL接口和具体业务，开发者只需要用接口地址别名请求，而需要更改接口配置时，不用知道在哪个页面调用了此接口，只需要将注意点放在apiConfig。
-3. 此插件可以在任何框架中使用，无需安装axios，已经集成在内，我本人在vue框架内使用，如果觉得在每个组件内引入api模块比繁琐，可以在`main.js`导入，然后挂载在`vue.prototype`上。
+3. 此插件可以在任何框架中使用，必须安装axios，在vue框架内使用时，如果觉得在每个组件内引入api模块比繁琐，可以在`main.js`导入，然后挂载在`vue.prototype`上。
 4. 至于插件接口的配置项，直接去看axios文档，与axios函数的第二个参数config完全一致。
-5. 构造器函数的第二参数dynamicRouterPattern支持自定义占位符重写，但是必须是字符串，而且必须要包含pattern。比如： {pattern}、@pattern。注意字符串内不允许出现正则表达式的特定符号，比如$、^等。
+5. 构造器函数的第二参数dynamicRouterPattern支持自定义占位符重写，但是必须是字符串，而且必须要包含`CONSTANT.DYNAMICROUTER_PATTERN_FLAG`。比如： `{CONSTANT.DYNAMICROUTER_PATTERN_FLAG}`、`@CONSTANT.DYNAMICROUTER_PATTERN_FLAG`。注意字符串内不允许出现正则表达式的特定符号，比如$、^等。
 
 ## license
 * Anti 996(996.ICU)

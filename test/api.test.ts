@@ -1,5 +1,6 @@
 import assert from "assert";
-import ApiModule from "../src/index";
+import axios from "axios";
+import ApiModule, { CONSTANT } from "../src/index";
 import { fork } from "child_process";
 import { join } from "path";
 import moduleA from "../example/api/moduleA";
@@ -7,13 +8,13 @@ import moduleB from "../example/api/moduleB";
 
 const serverIns = fork(join(process.cwd(), "example/server.js"))
 
-const api = new ApiModule({
-    baseURL: "http://localhost:7070"
+const api = new ApiModule(axios, {
+    baseURL: "http://127.0.0.1:7070",
+    timeout: 10000
 }, {
     // 自定义动态路由的占位符为@开头
-    dynamicRouterPattern: "@pattern"
+    dynamicRouterPattern: `@${CONSTANT.DYNAMICROUTER_PATTERN_FLAG}`
 });
-
 
 const { request } = api.registerModule({ name: "Hello", module: moduleA as any })
     .registerModule({ name: "Hi", module: moduleB as any })
@@ -97,13 +98,13 @@ describe("ApiModule", function () {
             })
                 .then(({ data }) => {
                     assert.strictEqual(data, "Hi  Alan Chen， 来自Module Hi模块")
-                    done()
+                    done();
                 })
                 .catch(err => {
                     if (err) {
-                        done(err)
+                        done(err);
                     }
-                })
+                });
         })
     })
 })

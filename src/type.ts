@@ -1,4 +1,4 @@
-import { AxiosRequestConfig, AxiosPromise } from "axios";
+import { AxiosRequestConfig, AxiosPromise, AxiosStatic } from "axios";
 
 /**
  * 插件预先配置.
@@ -39,4 +39,6 @@ export declare interface RequestConfig {
 /**
  * 插件的request方法.
  */
-export declare type RequestHandler = (request: RequestConfig) => AxiosPromise<any>
+export declare type RequestHandler = AxiosStatic
+
+export declare type ResponsePromise = AxiosPromise<any>

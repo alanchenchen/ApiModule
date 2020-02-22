@@ -7,7 +7,7 @@
         "allowSyntheticDefaultImports": true,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        "target": "es2016",
+        "target": "ES3",
         "skipLibCheck": true,
         "diagnostics": true,
         "jsx": "react",

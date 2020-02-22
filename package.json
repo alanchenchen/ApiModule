@@ -1,16 +1,15 @@
 {
   "name": "api-module",
-  "version": "0.2.0",
+  "version": "0.2.7",
   "author": "Alan Chen",
   "description": "A solution to use axios with configs separated to modules",
-  "module": "dist/ApiModule.mjs",
   "main": "dist/ApiModule.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "config": "ts-node cli/index.ts",
     "build": "rollup -c",
     "test": "mocha --require ts-node/register --watch-extensions ts,js 'test/**/*.test.{ts,js}'",
-    "prepublishOnly": "npm test && npm run build",
+    "prepublishOnly": "npm run build",
     "example:client": "ts-node example/client.ts",
     "example:server": "node example/server.js"
   },
@@ -23,6 +22,8 @@
     "@types/express": "^4.17.2",
     "@types/mocha": "^7.0.1",
     "@types/node": "^13.7.4",
+    "api-module": "^0.2.7",
+    "axios": "^0.19.2",
     "chalk": "^3.0.0",
     "express": "^4.17.1",
     "inquirer": "^7.0.4",
@@ -62,8 +63,5 @@
   "bugs": {
     "url": "https://github.com/alanchenchen/ApiModule/issues",
     "email": "739709491@qq.com"
-  },
-  "dependencies": {
-    "axios": "^0.19.2"
   }
 }
