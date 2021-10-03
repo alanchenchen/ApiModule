@@ -1,10 +1,11 @@
 {
     "compilerOptions": {
-        "module": "CommonJS",
+        "module": "ESNext",
         "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
         "allowJs": true,
         "checkJs": true,
-        "allowSyntheticDefaultImports": true,
+        "resolveJsonModule": true,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "target": "ES3",

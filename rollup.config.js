@@ -9,6 +9,7 @@ import commonjs from "rollup-plugin-commonjs";
 import json from "@rollup/plugin-json";
 import builtins from "rollup-plugin-node-builtins";
 import globals from "rollup-plugin-node-globals";
+import clear from 'rollup-plugin-clear';
 
 import pkg from "./package.json";
 
@@ -24,11 +25,6 @@ if (pkg.useFrame === true) {
     ts = require("rollup-plugin-typescript2")({
         verbosity: 2,
         clean: true,
-        tsconfigOverride: {
-            compilerOptions: {
-                module: "ESNext"
-            }
-        }
     });
 }
 
@@ -40,16 +36,19 @@ const name = pkg.name
 export default {
     input: "src/index.ts",
     output: [
-        // { file: `${pkg.module}`, format: "es" },
-        { file: `${pkg.main}`, format: "umd", name }
+        { file: `${pkg.module}`, format: "es" },
+        { file: `${pkg.main}`, format: "umd", name: "ApiModule" }
     ],
     plugins: [
+        clear({
+            targets: ['dist']
+        }),
         globals(),
         builtins(),
-        ts,
+        json(),
         resolve(),
         commonjs(),
-        json(),
+        ts,
         svelte({
             emitCss: true
         }),
@@ -58,7 +57,11 @@ export default {
             exclude: ["node_modules"],
             css: false
         }),
-        terser(),
+        terser({
+            format: {
+                comments: "some",
+            },
+        }),
         progress(),
         analyzer({
             // hideDeps: true,

@@ -6,9 +6,9 @@
 
 > 基于axios二次封装，为了解决RESTFUL接口冗余问题的一种前端工程化尝试
 
-> version:  0.2.7
+> version:  1.0.0
 
-> lastDate: 2020/2/22
+> lastDate: 2021/10/03
 
 > Author:  Alan Chen
 

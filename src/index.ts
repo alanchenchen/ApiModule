@@ -1,7 +1,8 @@
-/**!
+/*!
  * @name ApiModule
  * @author Alan chen 
  * @since 2020/2/21
+ * @version 1.0.0
  * @license Anti996
  */
 import {
@@ -19,9 +20,10 @@ import {
     MODULE_PATTERN,
     DEFAULT_BASECONFIG
 } from "./constant";
+import pkg from "../package.json"
 
 class ApiModule {
-    private version: string = require("../package.json").version;
+    private version: string = pkg.version;
     private createdBy: string = "alanchenchen@github.com";
     private fetch: any;
     private moduleApiInfo: ModuleApiConfig[] = [];
